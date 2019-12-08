@@ -1,6 +1,17 @@
 # Compiled class file
 *.class
 
+#aws
+.aws-sam/
+samconfig.toml
+events/
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
 # Log file
 *.log
 
