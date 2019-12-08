@@ -1,4 +1,4 @@
-package store_email;
+package subscribe;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

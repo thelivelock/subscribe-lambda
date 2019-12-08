@@ -1,4 +1,4 @@
-package store_email.dto;
+package subscribe.dto;
 
 import java.util.Locale;
 

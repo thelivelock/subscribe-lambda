@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>store_email</groupId>
-    <artifactId>StoreEmail</artifactId>
+    <groupId>com.thelivelock</groupId>
+    <artifactId>getdailyscores</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
-    <name>A sample Store Email created for SAM CLI.</name>
+    <name>A Subscribe lambda created for SAM CLI.</name>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>

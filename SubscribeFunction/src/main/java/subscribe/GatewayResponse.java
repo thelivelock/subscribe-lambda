@@ -1,4 +1,4 @@
-package store_email;
+package subscribe;
 
 import java.util.Collections;
 import java.util.HashMap;

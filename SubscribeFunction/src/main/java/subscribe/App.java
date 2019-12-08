@@ -1,4 +1,4 @@
-package store_email;
+package subscribe;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import store_email.dto.UserInfoDto;
+import subscribe.dto.UserInfoDto;
 
 /**
  * Handler for requests to Lambda function.
