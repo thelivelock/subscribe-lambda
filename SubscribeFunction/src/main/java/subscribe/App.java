@@ -1,15 +1,18 @@
 package subscribe;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.util.StringUtils;
 import subscribe.dto.UserInfoDto;
 
 /**
@@ -17,24 +20,43 @@ import subscribe.dto.UserInfoDto;
  */
 public class App implements RequestHandler<UserInfoDto, Object> {
 
-    public Object handleRequest(final UserInfoDto input, final Context context) {
+    public Object handleRequest(final UserInfoDto userSubscription, final Context context) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
-        headers.put("X-Custom-Header", "application/json");
 
-        try {
-            final String pageContents = this.getPageContents("https://checkip.amazonaws.com");
-            String output = String.format("{ \"message\": \"hello world\", \"location\": \"%s\" }", pageContents);
-            return new GatewayResponse(output, headers, 200);
-        } catch (IOException e) {
-            return new GatewayResponse("{}", headers, 500);
-        }
+        // Set up connection to Dynamo DB
+        AmazonDynamoDBAsync dynamoDBClient = AmazonDynamoDBAsyncClientBuilder.standard()
+                                                                              .withRegion(Regions.EU_CENTRAL_1)
+                                                                              .build();
+        DynamoDB dynamoDB = new DynamoDB(dynamoDBClient);
+        Table usersTable = dynamoDB.getTable(Constants.USERS_TABLE.getValue());
+        Item userSubscriptionItem = new Item();
+
+        validateUserSubscription(userSubscription);
+        constructUserSubscriptionItem(userSubscriptionItem, userSubscription);
+
+        // store user subscription item
+        usersTable.putItem(userSubscriptionItem);
+
+        String output = String.format("{ \"email\": \"%s\", \"location\": \"%s\" }",
+                                          userSubscription.getEmail(), userSubscription.getLocale().getLanguage());
+        return new GatewayResponse(output, headers, 200);
     }
 
-    private String getPageContents(String address) throws IOException{
-        URL url = new URL(address);
-        try(BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()))) {
-            return br.lines().collect(Collectors.joining(System.lineSeparator()));
+    private void validateUserSubscription(UserInfoDto userSubscription) {
+        boolean isInvalid = StringUtils.isNullOrEmpty(userSubscription.getEmail())
+                              || StringUtils.isNullOrEmpty(userSubscription.getLocale().getLanguage());
+
+        if (isInvalid) {
+            throw new RuntimeException("Invalid payload, don't go down to AWS to waist money and free tier quota");
         }
-    }
-}
+    };
+
+    private void constructUserSubscriptionItem(Item userSubscriptionItem, UserInfoDto userSubscription) {
+        String userId = UUID.randomUUID().toString();
+        userSubscriptionItem.withString("id", userId);
+        userSubscriptionItem.withString("email", userSubscription.getEmail());
+        String userLocale = userSubscription.getLocale().getLanguage();
+        userSubscriptionItem.withString("locale", userLocale);
+    };
+};
