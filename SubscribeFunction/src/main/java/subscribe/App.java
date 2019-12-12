@@ -30,10 +30,9 @@ public class App implements RequestHandler<UserInfoDto, Object> {
                                                                               .build();
         DynamoDB dynamoDB = new DynamoDB(dynamoDBClient);
         Table usersTable = dynamoDB.getTable(Constants.USERS_TABLE.getValue());
-        Item userSubscriptionItem = new Item();
 
         validateUserSubscription(userSubscription);
-        constructUserSubscriptionItem(userSubscriptionItem, userSubscription);
+        Item userSubscriptionItem = createUserSubscriptionItem(userSubscription);
 
         // store user subscription item
         usersTable.putItem(userSubscriptionItem);
@@ -52,11 +51,14 @@ public class App implements RequestHandler<UserInfoDto, Object> {
         }
     };
 
-    private void constructUserSubscriptionItem(Item userSubscriptionItem, UserInfoDto userSubscription) {
+    private Item createUserSubscriptionItem(UserInfoDto userSubscription) {
+        Item userSubscriptionItem = new Item();
         String userId = UUID.randomUUID().toString();
         userSubscriptionItem.withString("id", userId);
         userSubscriptionItem.withString("email", userSubscription.getEmail());
         String userLocale = userSubscription.getLocale().getLanguage();
         userSubscriptionItem.withString("locale", userLocale);
+
+        return userSubscriptionItem;
     };
 };
