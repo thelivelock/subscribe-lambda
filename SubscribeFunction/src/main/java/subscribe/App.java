@@ -5,9 +5,10 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import subscribe.dto.UserInfoDto;
@@ -18,16 +19,14 @@ import subscribe.dto.UserInfoDto;
 public class App implements RequestHandler<UserInfoDto, Object> {
 
     public Object handleRequest(final UserInfoDto input, final Context context) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-        headers.put("X-Custom-Header", "application/json");
-
+        AmazonDynamoDB client = DynamoDBClientBuilder.createClient();
+        ListTablesResult listTablesResult = client.listTables();
         try {
             final String pageContents = this.getPageContents("https://checkip.amazonaws.com");
             String output = String.format("{ \"message\": \"hello world\", \"location\": \"%s\" }", pageContents);
-            return new GatewayResponse(output, headers, 200);
+            return new GatewayResponse(output, new HashMap<>(), 200);
         } catch (IOException e) {
-            return new GatewayResponse("{}", headers, 500);
+            return new GatewayResponse("{}", new HashMap<>(), 500);
         }
     }
 
