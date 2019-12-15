@@ -8,7 +8,11 @@ Description: >
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 20
+    Timeout: 30
+    Environment:
+      Variables:
+        DYNAMODB_ENDPOINT_OVERRIDE: ""
+        USERS_TABLE_NAME: !Ref UsersTable
 
 Resources:
   SubscribeFunction:
@@ -17,17 +21,29 @@ Resources:
       CodeUri: SubscribeFunction
       Handler: subscribe.App::handleRequest
       Runtime: java8
-      MemorySize: 128
-      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
-        Variables:
-          PARAM1: VALUE
+      MemorySize: 256
       Events:
         Subscribe:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /subscribe
             Method: post
-
+      Policies:
+        DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: scoring-service-users
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
