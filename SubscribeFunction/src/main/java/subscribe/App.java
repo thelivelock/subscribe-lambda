@@ -18,9 +18,9 @@ import static subscribe.Constants.USERS_TABLE_NAME;
 /**
  * Handler for requests to Lambda function.
  */
-public class App implements RequestHandler<UserInfoDto, Object> {
+public class App implements RequestHandler<UserInfoDto, GatewayResponse> {
 
-    public Object handleRequest(final UserInfoDto userSubscription, final Context context) {
+    public GatewayResponse handleRequest(final UserInfoDto userSubscription, final Context context) {
         validateUserSubscription(userSubscription);
 
         // set up connection to Dynamo DB
