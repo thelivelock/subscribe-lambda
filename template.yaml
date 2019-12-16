@@ -12,7 +12,7 @@ Globals:
     Environment:
       Variables:
         DYNAMODB_ENDPOINT_OVERRIDE: ""
-        USERS_TABLE_NAME: !Ref UsersTable
+        USERS_TABLE_NAME: "scoring-service-users"
 
 Resources:
   SubscribeFunction:

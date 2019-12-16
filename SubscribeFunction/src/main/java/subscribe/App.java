@@ -10,6 +10,7 @@ import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.util.StringUtils;
+import org.apache.http.HttpStatus;
 import subscribe.dto.UserInfoDto;
 
 import static subscribe.Constants.USERS_TABLE_NAME;
@@ -36,7 +37,7 @@ public class App implements RequestHandler<UserInfoDto, Object> {
         headers.put("Content-Type", "application/json");
         String output = String.format("{ \"email\": \"%s\", \"location\": \"%s\" }",
                                           userSubscription.getEmail(), userSubscription.getLocale().getLanguage());
-        return new GatewayResponse(output, headers, 200);
+        return new GatewayResponse(output, headers, HttpStatus.SC_CREATED);
     }
 
     private void validateUserSubscription(UserInfoDto userSubscription) {
