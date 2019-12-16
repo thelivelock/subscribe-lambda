@@ -10,6 +10,8 @@ import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.util.StringUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpStatus;
 import subscribe.dto.UserInfoDto;
 
@@ -35,15 +37,20 @@ public class App implements RequestHandler<UserInfoDto, GatewayResponse> {
         // send response
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
-        String output = String.format("{ \"email\": \"%s\", \"location\": \"%s\" }",
-                                          userSubscription.getEmail(), userSubscription.getLocale().getLanguage());
-        return new GatewayResponse(output, headers, HttpStatus.SC_CREATED);
+        ObjectMapper jsonConverter = new ObjectMapper();
+        try {
+            String jsonUserSubscription = jsonConverter.writeValueAsString(userSubscription);
+            return new GatewayResponse(jsonUserSubscription, headers, HttpStatus.SC_CREATED);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not create response object from user subscription.");
+        }
     }
 
     private void validateUserSubscription(UserInfoDto userSubscription) {
         boolean isInvalid = StringUtils.isNullOrEmpty(userSubscription.getEmail())
-                              || StringUtils.isNullOrEmpty(userSubscription.getLocale().getLanguage());
-
+                              || StringUtils.isNullOrEmpty(userSubscription.getLocale().getLanguage())
+                              || StringUtils.isNullOrEmpty(userSubscription.getTimeZone());
         if (isInvalid) {
             throw new RuntimeException("Invalid payload, don't go down to AWS to waste money and free tier quota");
         }
@@ -56,6 +63,7 @@ public class App implements RequestHandler<UserInfoDto, GatewayResponse> {
         userSubscriptionItem.withString("email", userSubscription.getEmail());
         String userLocale = userSubscription.getLocale().getLanguage();
         userSubscriptionItem.withString("locale", userLocale);
+        userSubscriptionItem.withString("timeZone", userSubscription.getTimeZone());
 
         return userSubscriptionItem;
     };
