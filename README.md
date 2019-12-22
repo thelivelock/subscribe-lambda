@@ -118,3 +118,11 @@ aws cloudformation delete-stack --stack-name AWS
 See the [AWS SAM developer guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) for an introduction to SAM specification, the SAM CLI, and serverless application concepts.
 
 Next, you can use AWS Serverless Application Repository to deploy ready to use Apps that go beyond hello world samples and learn how authors developed their applications: [AWS Serverless Application Repository main page](https://aws.amazon.com/serverless/serverlessrepo/)
+
+## Version of tools
+```
+AWS2 CLI: aws-cli/2.0.0dev2 Python/3.7.5
+Docker: Docker version 19.03.5, build 633a0ea
+SAM: SAM CLI, version 0.38.0
+AWS Toolkit for Intellij : 1.9-193
+```
