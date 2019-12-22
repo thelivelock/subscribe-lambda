@@ -42,7 +42,10 @@ public class DynamoDbWrapper {
             userSubscriptionItem.put("locale", new AttributeValue().withS(userSubscription.getLocale().getLanguage()));
         }
 
-        userSubscriptionItem.put("timeZone", new AttributeValue().withS(userSubscription.getTimeZone()));
+        if (userSubscription.getTimeZone() != null) {
+            userSubscriptionItem.put("timeZone", new AttributeValue().withS(userSubscription.getTimeZone()));
+        }
+
         return userSubscriptionItem;
     }
 
