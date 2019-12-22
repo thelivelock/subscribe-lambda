@@ -38,7 +38,10 @@ public class DynamoDbWrapper {
         String userId = UUID.randomUUID().toString();
         userSubscriptionItem.put("id", new AttributeValue().withS(userId));
         userSubscriptionItem.put("email", new AttributeValue().withS(userSubscription.getEmail()));
-        userSubscriptionItem.put("locale", new AttributeValue().withS(userSubscription.getLocale().getLanguage()));
+        if (userSubscription.getLocale() != null) {
+            userSubscriptionItem.put("locale", new AttributeValue().withS(userSubscription.getLocale().getLanguage()));
+        }
+
         userSubscriptionItem.put("timeZone", new AttributeValue().withS(userSubscription.getTimeZone()));
         return userSubscriptionItem;
     }
