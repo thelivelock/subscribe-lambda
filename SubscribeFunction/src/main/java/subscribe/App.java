@@ -1,19 +1,23 @@
 package subscribe;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpStatus;
 import subscribe.dto.UserInfoDto;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Handler for requests to Lambda function.
  */
-public class App implements RequestHandler<UserInfoDto, GatewayResponse> {
+public class App implements RequestHandler<InputStream, GatewayResponse> {
 
     private DynamoDbWrapper dynamoDbWrapper;
 
@@ -21,7 +25,8 @@ public class App implements RequestHandler<UserInfoDto, GatewayResponse> {
         this.dynamoDbWrapper = new DynamoDbWrapper();
     }
 
-    public GatewayResponse handleRequest(final UserInfoDto userSubscription, final Context context) {
+    public GatewayResponse handleRequest(final InputStream lambdaInput, final Context context) {
+        UserInfoDto userSubscription = this.getUserSubscriptionDto(lambdaInput);
         validateInput(userSubscription);
         if (dynamoDbWrapper.userSubscriptionExists(userSubscription)) {
             throw new RuntimeException("Email already exists.");
@@ -56,4 +61,20 @@ public class App implements RequestHandler<UserInfoDto, GatewayResponse> {
             throw new RuntimeException("Could not create response object from user subscription.");
         }
     }
+
+    private UserInfoDto getUserSubscriptionDto(InputStream lambdaInput) {
+        UserInfoDto userSubscription = null;
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            JsonNode jsonNode = objectMapper.readTree(lambdaInput);
+            String body = jsonNode.get("body").asText();
+            body = java.net.URLDecoder.decode(body, StandardCharsets.UTF_8.name());
+            userSubscription = objectMapper.readValue(body, UserInfoDto.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return userSubscription;
+    }
+
 }
